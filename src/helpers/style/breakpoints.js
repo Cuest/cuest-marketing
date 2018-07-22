@@ -1,6 +1,5 @@
-import { css } from 'styled-components';
-
-import { objectMap } from './utility';
+import { css } from 'styled-components'
+import _ from 'lodash'
 
 // --------------------------------------------------
 
@@ -16,7 +15,7 @@ export const defaultBreakpoints = {
 }
 export const defaultBps = defaultBreakpoints
 
-export const bp = objectMap(defaultBps, (key, val) => ({
+export const bp = _.mapValues(defaultBps, (val, key) => ({
   min: (...cont) =>
     css`
       @media (min-width: ${val.min}px) {
