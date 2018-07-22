@@ -11,16 +11,10 @@ import { getFormData } from '../helpers'
 
 const _paneWidth = 400
 const Pane = styled.div`
-  background-color: rgba(0,0,0,0.5);
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4em 2em;
+  padding: 4em 3em;
 
   color: white;
   text-transform: uppercase;
@@ -28,15 +22,19 @@ const Pane = styled.div`
 `
 
 const Logo = styled.div`
-  flex-shrink: 1;
-  flex: 1;
   width: 100%;
-  max-height: 500px;
+  max-width: 400px;
   margin-bottom: 4em;
   background-image: url(/img/cuest-logo.png);
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center center;
+
+  &:after {
+    content: "";
+    padding-top: 120%;
+    display: block;
+  }
 `
 
 const SubscribeText = styled.div`
