@@ -27,3 +27,15 @@ export const getFormData = (...args) => {
 
   return variables
 }
+
+// better fetch
+export const betch = (url, opts) => {
+  return fetch(url, opts)
+    .then(x => x.ok ? x : Promise.reject(x))
+}
+
+export const delay = (ms = 1000) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, ms)
+  })
+}

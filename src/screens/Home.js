@@ -3,18 +3,19 @@ import styled from 'styled-components'
 import { compose, withState, withHandlers, withPropsOnChange, pure } from 'recompose'
 
 import theme from '../theme'
-import { getFormData } from '../helpers'
+import Ripple from '../components/Ripple'
+import { getFormData, bp, betch, delay } from '../helpers'
 
 // gql-------------------------------------
 
 // styled----------------------------------
 
-const _paneWidth = 400
 const Pane = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 4em 3em;
+  ${bp.sm.min`padding-bottom: 0;`}
 
   color: white;
   text-transform: uppercase;
@@ -23,8 +24,9 @@ const Pane = styled.div`
 
 const Logo = styled.div`
   width: 100%;
-  max-width: 400px;
-  margin-bottom: 4em;
+  ${bp.sm.min`max-width: 50vh;`}
+  ${bp.xs.max`max-width: 250px;`}
+  margin-bottom: 3em;
   background-image: url(/img/cuest-logo.png);
   background-size: contain;
   background-repeat: no-repeat;
@@ -46,9 +48,9 @@ const Form = styled.form`
   display: flex;
   flex-direction: row;
   border: 3px solid ${theme.colors.primary};
-  border-right: 0;
   width: 100%;
   max-width: 300px;
+  position: relative;
 `
 
 const _commonInputStyle = `
@@ -57,14 +59,17 @@ const _commonInputStyle = `
   font-size: inherit;
   padding: 0.5rem;
   border: 0;
+  outline: 0;
   line-height: 1rem;
 `
+const submitInputWidth = `2.25rem`
 
 const EmailInput = styled.input`
   ${_commonInputStyle}
   background-color: rgba(0,0,0,0.5);
   text-transform: uppercase;
   flex: 1;
+  border-right: ${submitInputWidth} solid transparent;
 
 `
 
@@ -73,16 +78,82 @@ const SubmitInput = styled.input`
   background-color: ${theme.colors.primary};
   font-family: 'Material Icons';
   font-size: 1.5em;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: ${p => p['data-submitted'] ? '100%' : submitInputWidth};
+  color: ${p => (p['data-submitted'] || p['data-loading']) ? 'transparent' : 'white'};
+  transition: 0.3s ease-in width, 0.1s linear color;
+`
+
+const spinnerWidthPx = 36
+const Spinner = styled.div`
+  position: absolute;
+  top: 50%;
+  right: 0;
+  margin-top: -${spinnerWidthPx * 0.5}px;
+  margin-right: -1.5px;
+  width: ${spinnerWidthPx}px;
+  opacity: ${p => p['data-visible'] ? 1 : 0};
+  transition: 0.1s linear opacity;
+  pointer-events: none;
+`
+
+const SubmittedText = styled.div`
+  ${_commonInputStyle}
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  color: ${p => p['data-visible'] ? 'white' : 'transparent'};
+  transition: 0.1s linear color 0.2s;
+`
+
+const ErrorText = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 1em;
+  font-size: 0.7em;
+  text-align: center;
+  pointer-events: none;
+  color: ${p => p['data-visible'] ? 'palevioletred' : 'transparent'};
+  transition: 0.1s linear color;
 `
 
 // enhance---------------------------------
 
+const submitEmail = (email) => {
+  // return betch('somewhere.com', {
+  //   method: 'POST',
+  //   body: { email }
+  // })
+  return delay()
+}
+
 const enhance = compose(
+  withState('submitted', 'setSubmitted', false),
+  withState('error', 'setError', false),
+  withState('loading', 'setLoading', false),
   withHandlers({
-    handleSubmit: () => e => {
+    handleSubmit: ({ setError, setSubmitted, setLoading, submitted, loading }) => e => {
       e.preventDefault()
-      console.log(getFormData(e))
-      console.log({ e })
+      if (!submitted && !loading) {
+        setLoading(true)
+        const { email } = getFormData(e)
+        submitEmail(email)
+          .then(() => { setSubmitted(true) })
+          .catch(() => { setError(true) })
+          .then(() => { setLoading(false) })
+      }
     }
   })
 )
@@ -90,7 +161,7 @@ const enhance = compose(
 // component-------------------------------
 
 const Comp = props => {
-  const { handleSubmit } = props
+  const { handleSubmit, submitted, error, loading } = props
   return <Pane>
     <Logo />
     <SubscribeText>Subscribe for updates</SubscribeText>
@@ -105,7 +176,12 @@ const Comp = props => {
         type='submit'
         value='send'
         className='material-icon'
+        data-submitted={submitted}
+        data-loading={loading}
       />
+      <Spinner data-visible={loading}><Ripple size={36} /></Spinner>
+      <SubmittedText data-visible={submitted}>Thanks!</SubmittedText>
+      <ErrorText data-visible={error}>Something went wrong. Try again later.</ErrorText>
     </Form>
   </Pane>
 }

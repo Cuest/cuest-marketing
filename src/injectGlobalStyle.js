@@ -1,4 +1,12 @@
 import { injectGlobal } from 'styled-components'
+import { bpEach } from './helpers'
+
+const bodyFontSizes = {
+  xs: '14px',
+  sm: '15px',
+  md: '16px',
+  lg: '16px'
+}
 
 export default () => injectGlobal`
   @import url('https://fonts.googleapis.com/css?family=Rubik:400,700');
@@ -8,7 +16,7 @@ export default () => injectGlobal`
   }
 
   body {
-    font-size: 16px;
+    ${bpEach('font-size', bodyFontSizes)}
     font-family: Rubik, sans-serif
   }
 
