@@ -132,11 +132,19 @@ const ErrorText = styled.div`
 // enhance---------------------------------
 
 const submitEmail = (email) => {
-  // return betch('somewhere.com', {
-  //   method: 'POST',
-  //   body: { email }
-  // })
-  return delay()
+  return betch('https://api.graph.cool/simple/v1/cjko7xpai5x840129ew6agtcw', {
+    body: `{"query":"mutation { createEmail(email: \\"${email}\\", sent: false){ email } }"}`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Dnt: '1'
+    },
+    method: 'POST'
+  })
+    .then(x => x.json())
+    .then(x => {
+      if (x.error) throw new Error(x.error)
+    })
 }
 
 const enhance = compose(
